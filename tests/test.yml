@@ -34,17 +34,17 @@
           notify:
             - reload apache
 
-      # # for the purposes of testing and debugging, write out the hostvars json
-      # always:
-      #   - name: create the var cache directory
-      #     file:
-      #       name: "/var/cache/ansible/attributes"
-      #       state: directory
-      #     tags: always
+      # for the purposes of testing and debugging, write out the hostvars json
+      always:
+        - name: create the var cache directory
+          file:
+            name: "/var/cache/ansible/attributes"
+            state: directory
+          tags: always
 
-      #   - name: write out the hostvars to json for inspec testing
-      #     copy:
-      #       content: "{{ hostvars[inventory_hostname] | strip_fieldattributes | to_nice_json }}"
-      #       dest: "/var/cache/ansible/attributes/hostvars.json"
-      #     changed_when: false
-      #     tags: always
+        - name: write out the hostvars to json for inspec testing
+          copy:
+            content: "{{ hostvars[inventory_hostname] | strip_fieldattributes | to_nice_json }}"
+            dest: "/var/cache/ansible/attributes/hostvars.json"
+          changed_when: false
+          tags: always

@@ -6,16 +6,15 @@ vars_json = json('/var/cache/ansible/attributes/hostvars.json')
 vars = vars_json.params
 
 
-control 'check-bootstrap' do
+control 'check-attributes-1' do
   impact 0.6
-  title 'very basic tests that should pass'
-  desc ' '
-
-  describe file('/tmp') do
-    it { should be_directory }
+  title "Check attribtues for node: #{vars['ansible_hostname']}"
+  desc '      Checking the hostvars cache is sensible  '
+  describe file('/var/cache/ansible/attributes/hostvars.json') do
+    it { should exist }
+    #  its('mode') { should cmp 0644 }
   end
 end
-
 
 #                           _            _            _
 #     __ _ _ __   __ _  ___| |__   ___  | |_ ___  ___| |_ ___

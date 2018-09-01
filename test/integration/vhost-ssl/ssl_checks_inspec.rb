@@ -6,6 +6,17 @@ vars_json = json('/var/cache/ansible/attributes/hostvars.json')
 vars = vars_json.params
 
 
+control 'check-attributes-1' do
+  impact 0.6
+  title "Check attribtues for node: #{vars['ansible_hostname']}"
+  desc '      Checking the hostvars cache is sensible  '
+  describe file('/var/cache/ansible/attributes/hostvars.json') do
+    it { should exist }
+    #  its('mode') { should cmp 0644 }
+  end
+end
+
+
 control 'check-vhost-ssl' do
   impact 0.6
   title "Check ssl for node: #{vars['ansible_hostname']}"
