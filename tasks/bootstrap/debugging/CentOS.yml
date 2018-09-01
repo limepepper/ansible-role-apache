@@ -1,0 +1,34 @@
+---
+
+- become: True
+  block:
+
+    # pip is in EPEL
+  - name: install EPEL for CentOS
+    package:
+      name:
+        - mlocate
+        - yum-utils
+        - telnet
+        - wget
+        - strace
+        - gdb
+        - tcpdump
+        - lynx
+        - wget
+        - curl
+        - bind-utils
+        - iotop
+        - dstat
+        - procps
+        - lsof
+        - nmap
+        - jq
+
+    # update the mlocate database in the background
+  - name: update the mlocate database
+    command: updatedb
+    async: 1000
+    poll: 0
+    changed_when: False
+

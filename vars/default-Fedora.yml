@@ -1,0 +1,16 @@
+---
+
+
+
+apache_mod_names:
+  mod_security: mod_security
+
+php_packages:
+  - php
+  - php-pdo
+  - php-mysqlnd
+  - php-gd
+  - php-mcrypt
+  - php-mbstring
+  - php-xml
+  - php-fpm

@@ -1,0 +1,21 @@
+---
+# handlers file for limepepper.co.uk
+
+- name: restart apache
+  service: name={{ apache_service }} state=restarted
+  become: true
+
+- name: reload apache
+  service: name={{ apache_service }} state=reloaded
+  become: true
+
+- name: restart php-fpm
+  service: name="php-fpm" state=restarted
+  become: true
+  when: ansible_distribution == 'Fedora'
+  # listen: restart apache
+
+- name: null handler
+  debug:
+    msg: the handler was called on logfiles_changed
+  listen: logfiles_changed

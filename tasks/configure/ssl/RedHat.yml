@@ -1,0 +1,12 @@
+---
+
+- tags: [ apache, ssl ]
+  become: yes
+  block:
+
+  - name: install SSL dependencies
+    package:
+      name:
+        - mod_ssl
+    notify:
+      - restart apache

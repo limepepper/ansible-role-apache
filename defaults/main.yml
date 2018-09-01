@@ -1,0 +1,16 @@
+---
+
+apache:
+  modules: []
+  adminips: []
+apache_modules: []
+webserver_options: []
+php_version: stock
+apache_version: stock
+apache_suite: default
+apache_scl_pkgs: []
+
+logging_debug: False
+
+apache_vhosts_ssl: []
+apache_vhosts: []

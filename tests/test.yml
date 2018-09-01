@@ -1,0 +1,50 @@
+---
+
+- hosts: all
+  become: yes
+
+  # if the distro doesn't ship with python
+  # this shims it in before fact gathering
+  gather_facts: false
+  pre_tasks:
+  - name: Install python2 for Ansible
+    raw: sh -c "test -e /usr/bin/python || ( ( test -e /usr/bin/apt && apt -qqy update && apt install -qqy python-minimal) || ( test -e /usr/bin/dnf && /usr/bin/dnf -qy install python) || ( test -e /usr/bin/yum && /usr/bin/yum -qy install python) )"
+    register: output
+    changed_when: 'output.stdout|trim() != ""'
+  - name: Gathering Facts
+    setup:
+    tags: always
+  # end of python shim
+
+  tasks:
+
+    - block:
+        - name: import the role under test
+          import_role:
+            name: '{{playbook_dir}}/..'
+
+        - name: the http vhost to stage the http challenge response
+          apache_vhost:
+            ServerName: mywordpresssite2.com
+            ServerAliases:
+              - www.mywordpresssite2.com
+            DocumentRoot: /var/www/mywordpresssite2.com
+          register: mywordpresssite2_com_vhost
+          tags: dovhost
+          notify:
+            - reload apache
+
+      # # for the purposes of testing and debugging, write out the hostvars json
+      # always:
+      #   - name: create the var cache directory
+      #     file:
+      #       name: "/var/cache/ansible/attributes"
+      #       state: directory
+      #     tags: always
+
+      #   - name: write out the hostvars to json for inspec testing
+      #     copy:
+      #       content: "{{ hostvars[inventory_hostname] | strip_fieldattributes | to_nice_json }}"
+      #       dest: "/var/cache/ansible/attributes/hostvars.json"
+      #     changed_when: false
+      #     tags: always

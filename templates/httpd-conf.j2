@@ -1,0 +1,101 @@
+
+
+{% if 'Listen' in vhost and vhost.Listen %}
+Listen {{ vhost.Listen }}
+{% endif %}
+
+# {{ vhost.Listen | default('80', true) }}
+
+<VirtualHost *:{{ vhost.Listen | default('80', true) }} >
+
+  ServerName {{ vhost.ServerName }}
+  ServerAlias {{ vhost.ServerAliases | join(' ') }} {% if vhost.dev_hostname is defined -%}
+  {{ vhost.dev_hostname }}
+  {%- endif %}
+
+  ServerAdmin webmaster@{{ vhost.ServerName }}
+  DocumentRoot {{ vhost.DocumentRoot }}
+
+  <Directory {{ vhost.DocumentRoot }} >
+    Options FollowSymLinks
+    # AllowOverride FileInfo Options
+    AllowOverride FileInfo
+    Order allow,deny
+    Allow from all
+  </Directory>
+
+  <IfModule status>
+    <Location "/server-status">
+      SetHandler server-status
+    </Location>
+  </IfModule>
+
+  <IfModule headers_module>
+      header set X-Clacks-Overhead "GNU Terry Pratchett"
+  </IfModule>
+
+{% if 'status' in apache.modules %}
+
+  <Location "/server-status">
+    SetHandler server-status
+
+# {{ apache_version.stdout_lines | join('') }}
+
+{% if apache_version.stdout_lines | join('') | version_compare('2.4', '>=') %}
+    Require ip {% for ip in adminips %}
+ {{ ip }}
+{%- endfor %}
+
+{% elif apache_version.stdout_lines | join('') | version_compare('2.2', '>=') %}
+    Order deny,allow
+    Deny from all
+    Allow from 127.0.0.1 ::1
+{% for ip in adminips %}
+    Allow from {{ ip }}
+{% endfor %}
+{% endif %}
+  </Location>
+
+{% endif %}
+
+{% if 'info' in apache.modules %}
+<Location "/server-info">
+    SetHandler server-info
+
+{% if apache_version.stdout | version_compare('2.4', '>=') %}
+    Require ip {% for ip in adminips %}
+ {{ ip }}
+{%- endfor %}
+
+{% elif apache_version.stdout | version_compare('2.2', '>=') %}
+    Order deny,allow
+    Deny from all
+    Allow from 127.0.0.1 ::1
+{% for ip in adminips %}
+    Allow from {{ ip }}
+{% endfor %}
+{% endif %}
+</Location>
+{% endif %}
+
+  LogLevel info
+  ErrorLog {{ apache_log_path }}/{{ vhost.ServerName }}-error.log
+  CustomLog {{ apache_log_path }}/{{ vhost.ServerName }}-access.log combined
+
+# send to remote syslog. seems like a bit of a hack
+# CustomLog "| /bin/sh -c '/usr/bin/tee -a /var/log/httpd/httpd-access.log | /usr/bin/logger -thttpd -plocal1.notice'" combined
+# ErrorLog "|/bin/sh -c '/usr/bin/tee -a /var/log/httpd/httpd-error.log | /usr/bin/logger -thttpd -plocal1.err'"
+
+# RewriteEngine On
+# RewriteLog {{ apache_log_path }}/{{ vhost.ServerName }}-rewrite.log
+# RewriteLogLevel 0
+# LogLevel alert rewrite:trace3
+
+</VirtualHost>
+
+{% if 'status' in apache.modules %}
+
+ExtendedStatus On
+
+{% endif %}
+

@@ -1,0 +1,44 @@
+---
+
+galaxy_info:
+  role_name: apache
+  author: Tom Hodder
+  description: Install and configure apache
+  company: "Lime Pepper Ltd"
+
+  license: "license (MIT)"
+
+  min_ansible_version: 2.5
+
+  # min_ansible_container_version:
+  # github_branch:
+
+  # https://galaxy.ansible.com/api/v1/platforms/?name=Fedora
+  # https://galaxy.ansible.com/api/v1/platforms/?page=2
+  platforms:
+    - name: Ubuntu
+      versions:
+        - xenial
+        - bionic
+    - name: Debian
+      versions:
+        # - jessie
+        - stretch
+        # - buster
+    - name: EL
+      versions:
+        - 6
+        - 7
+    - name: Fedora
+      versions:
+        - 28
+
+  galaxy_tags:
+    - system
+    - web
+    - webserver
+    - apache
+
+dependencies: []
+  # - src: git+https://github.com/limepepper/ansible-role-apache.git
+  # - src: git+https://github.com/limepepper/ansible-role-mysql.git

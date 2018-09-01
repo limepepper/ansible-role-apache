@@ -1,0 +1,42 @@
+---
+
+
+apache_user: apache
+apache_group: apache
+
+apache_service: httpd
+apache_daemon: httpd
+apache_daemon_path: /usr/sbin/
+apache_server_root: /etc/httpd
+apache_site_conf_path: /etc/httpd/sites-available
+apache_sites_available_dir: /etc/httpd/sites-available
+apache_site_enabled_conf_path: /etc/httpd/sites-enabled
+apache_conf_d_dir: /etc/httpd/conf.d
+apache_lib_dir: /etc/httpd/conf
+apache_conf_path: /etc/httpd/conf
+apache_conf_file: /etc/httpd/conf/httpd.conf
+apache_log_path: /var/log/httpd
+# if apachectl doesn't support pass through mode, see comment in script
+apache_apachectl: /usr/sbin/apachectl
+#apache_apachectl: /usr/sbin/httpd
+apache_package_name: httpd
+apache_package: httpd
+php_package_conf_dir: /etc/php.d
+apache_packages:
+  - httpd
+  - mod_ssl
+php_packages:
+  - php
+  - php-mysql
+  - php-gd
+  - php-mbstring
+  - php-bcmath
+  - php-xml
+  # php-devel
+  # php-pear
+apache_system_logs:
+  - error_log
+  - access_log
+  - ssl_error_log
+  - ssl_access_log
+  - ssl_request_log

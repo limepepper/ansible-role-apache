@@ -1,0 +1,43 @@
+---
+
+- tags: [ apache ]
+  become: yes
+  block:
+
+  - set_fact:
+      apache_packages: "{{ apache_profiles[apache_profile].apache_packages }}"
+      apache_service: "{{ apache_profiles[apache_profile].apache_service }}"
+      apache_log_path: "{{ apache_profiles[apache_profile].apache_log_path }}"
+      apache_apachectl: "{{ apache_profiles[apache_profile].apache_apachectl }}"
+      apache_site_conf_path: "{{ apache_profiles[apache_profile].apache_site_conf_path }}"
+      apache_conf_path: "{{ apache_profiles[apache_profile].apache_conf_path }}"
+      apache_conf_file: "{{ apache_profiles[apache_profile].apache_conf_file }}"
+      apache_version: "{{ apache_profiles[apache_profile].apache_version }}"
+      apache_package_name: "{{ apache_profiles[apache_profile].apache_package_name }}"
+      apache_system_logs: "{{ apache_profiles[apache_profile].apache_system_logs }}"
+      apache_site_enabled_conf_path: "{{ apache_profiles[apache_profile].apache_site_enabled_conf_path }}"
+      apache_sites_available_dir: "{{ apache_profiles[apache_profile].apache_sites_available_dir }}"
+
+    tags: always
+
+  - name: install Extra Apache Package repos
+    package:
+      name: "{{ apache_profiles[apache_profile].extra_package_repos|default([]) }}"
+    tags: [ pkgs ]
+
+  - name: install Apache Packages
+    package:
+      name:  "{{ apache_packages }}"
+    tags: [ pkgs ]
+
+  - name: Get version of Apache to select for changes between 2.2 and 2.4
+    shell: |
+      ( ( test -e /usr/bin/dpkg && dpkg -s {{ apache_package_name }} | grep '^Version:' | awk '{print $2}' ) || \
+      ( test -e /bin/rpm && rpm -qa {{ apache_package_name }} --queryformat %{VERSION}) )
+    register: apache_version_installed
+    changed_when: False
+    tags: always
+
+  - debug:
+      msg: "apache installed version is {{ apache_version_installed }}"
+    tags: always

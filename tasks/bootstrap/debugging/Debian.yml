@@ -1,0 +1,30 @@
+---
+
+- debug:
+    msg: "here is the message"
+
+- name: debian annoyances block
+  become: yes
+  tags: [ annoyances ]
+  block:
+
+    # Debian seems to need an apt-get update kick
+    - name: Update packages list (Debian)
+      apt: update_cache=yes
+      when: ansible_os_family == 'Debian'
+
+    # fix for https://github.com/pypa/pip/issues/4817
+    - name: Force upgrade of pip on Debian
+      pip:
+        name: pip
+        version: '9.0.1'
+        extra_args: -i https://pypi.python.org/simple/
+
+    - name: install Tools for Debian
+      package:
+        name:
+          - mlocate
+          - telnet
+          - apt-file
+          - net-tools
+          - whois
