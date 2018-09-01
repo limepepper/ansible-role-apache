@@ -1,0 +1,50 @@
+---
+
+driver:
+  name: digitalocean
+  size: s-2vcpu-4gb
+  private_networking: false
+  region: lon1
+  tags: do_test_pool
+  firewalls: <%= ENV['DO_FIREWALL_ID'] %>
+
+transport:
+  ssh_key: ~/.ssh/id_rsa.do-buildbot
+
+platforms:
+  - name: debian-9
+  - name: ubuntu-16
+  - name: ubuntu-18
+  # - name: centos-7
+  - name: centos-6
+  - name: centos-7
+  # - name: fedora-27
+  - name: fedora-28
+
+# kitchen-inspec expects test to be in test/integration/%suite%/inspec
+# verifier:
+#   name: inspec
+#   # format: junit
+#   # output: path/to/results/%{platform}_%{suite}_inspec.xml
+#   inspec_tests:
+#     #- tests/inspec/default
+#     - name: test-wordpress
+#       path: tests/inspec/default
+
+suites:
+  - name: default
+    provisioner:
+      show_command_output: true
+  - name: vhost-ssl
+    provisioner:
+      playbook: tests/test-vhost-ssl.yml
+    verifier:
+      inspec_tests:
+        - test/integration/default
+      # extra_vars:
+      #   webserver_options:
+      #     - mod-php
+      #     - virtualhost
+      #   tk_dep_roles:
+      #     - limepepper.mysql
+      #     - limepepper.apache
