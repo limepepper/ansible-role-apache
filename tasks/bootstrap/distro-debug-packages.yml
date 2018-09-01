@@ -1,0 +1,63 @@
+---
+
+
+- name: check for debug path
+  stat:
+    path: /var/cache/ansible/debug
+  register: p
+
+- debug:
+    var: p
+
+- tags: [ debug ]
+  become: True
+  when: p.stat.isdir is not defined
+  block:
+
+  - debug:
+      msg: |
+        {{ '/var/cache/ansible/debug' is directory }}
+
+  - name: "gather distro vars ({{ ansible_distribution }})"
+    include_tasks: "{{ distro_specific_tools }}"
+    with_first_found:
+    - files:
+      - "debugging/{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
+      - "debugging/{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+      - "debugging/{{ ansible_distribution }}.yml"
+      - "debugging/{{ ansible_os_family }}.yml"
+      - "debugging/{{ ansible_system }}.yml"
+      - "debugging/default.yml"
+      skip: true
+    loop_control:
+      loop_var: distro_specific_tools
+    # tags: [ always ]
+
+  - copy:
+      content: |
+        #!/bin/bash
+
+        while read -r line
+        do
+          echo "$line" | egrep -v '^[[:space:]]*$|^\w*#'
+        done < "${1:-/dev/stdin}"
+
+      dest: /usr/local/bin/stripconfig
+      owner: root
+      group: root
+      mode: 0775
+
+  - file:
+      name: "/var/cache/ansible/attributes"
+      state: directory
+
+  # - debug:
+  #     var: hostvars[inventory_hostname]
+
+  - copy:
+      content: "{{ hostvars[inventory_hostname] | strip_fieldattributes | to_nice_json }}"
+      dest: "/var/cache/ansible/attributes/hostvars.json"
+
+  - file:
+      name: /var/cache/ansible/debug
+      state: directory

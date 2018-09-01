@@ -1,0 +1,13 @@
+---
+
+- tags: main-run
+  become: True
+  block:
+
+  - name: install bootstrap shim packages
+    package:
+      name:
+        - libselinux-python
+        - selinux-policy
+        - python2-libsemanage
+

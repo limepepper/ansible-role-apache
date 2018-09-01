@@ -1,0 +1,7 @@
+---
+Bundler/DuplicatedGem:
+  Exclude:
+    - 'Gemfile'
+Style/GlobalVars:
+  Exclude:
+    - 'vagrant/vagrant.rb'

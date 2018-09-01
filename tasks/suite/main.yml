@@ -1,0 +1,56 @@
+---
+
+- tags: [ apache, suite ]
+  become: yes
+  block:
+
+  - name: "merge distro vars for ({{ ansible_distribution }})"
+    include_vars: "{{ distro_specific_vars }}"
+    with_items:
+      - "{{ apache_suite }}-{{ ansible_system }}.yml"
+      - "{{ apache_suite }}-{{ ansible_os_family }}.yml"
+      - "{{ apache_suite }}-{{ ansible_distribution }}.yml"
+      - "{{ apache_suite }}-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+      - "{{ apache_suite }}-{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
+    when: (role_path + '/vars/' + distro_specific_vars) is is_file
+    loop_control:
+      loop_var: distro_specific_vars
+    tags: always
+
+  - debug:
+      msg: |
+          the suite is {{ apache_suite }}
+          the ansible_distribution is {{ ansible_distribution }}
+
+  - name: call the distro/suite specific tasks for apache
+    include_tasks: "{{ include_suite_tasks }}"
+    with_first_found:
+    - files:
+        - "{{ apache_suite }}-{{ ansible_distribution }}-{{ ansible_distribution_version}}.yml"
+        - "{{ apache_suite }}-{{ ansible_distribution }}-{{ ansible_distribution_major_version}}.yml"
+        - "{{ apache_suite }}-{{ ansible_distribution }}.yml"
+        - "{{ apache_suite }}-{{ ansible_os_family }}.yml"
+        - "{{ apache_suite }}-{{ ansible_system }}.yml"
+    loop_control:
+      loop_var: include_suite_tasks
+    tags: always
+
+  - debug:
+      msg: "webserver_options is {{ webserver_options }}"
+    tags: always
+
+  - name: install configurables
+    include_tasks: "configure/{{ configurable_item }}.yml"
+    with_items: "{{ webserver_options }}"
+    loop_control:
+      loop_var: configurable_item
+    tags: always
+
+  - name: install apache modules
+    include_tasks: "modules/{{ module_item }}.yml"
+    with_items: "{{ apache_modules }}"
+    loop_control:
+      loop_var: module_item
+    tags:
+      - modules
+      - apache_modules

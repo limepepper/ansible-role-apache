@@ -1,0 +1,15 @@
+---
+
+- tags: [ bootstrap ]
+  become: True
+  block:
+
+  - debug:
+      msg: "using the generic boot strapper, this is probably not enough"
+
+  - name: install shim packages for Linuix (generic)
+    package:
+      name:
+        - python-pip
+        - unzip
+        - git
