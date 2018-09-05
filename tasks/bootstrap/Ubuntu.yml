@@ -19,3 +19,4 @@
         - git
         - curl
         - python-setuptools
+        - net-tools
