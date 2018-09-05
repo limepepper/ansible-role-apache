@@ -19,3 +19,11 @@
   debug:
     msg: the handler was called on logfiles_changed
   listen: logfiles_changed
+
+# if the apache was restarted as a final handler, inspec might fail
+- name: Wait 15 seconds for port 80
+  wait_for:
+    port: 80
+    delay: 0
+    timeout: 15
+  listen: restart apache
