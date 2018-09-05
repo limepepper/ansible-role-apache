@@ -1,0 +1,60 @@
+---
+
+- tags: [ apache, suite ]
+  become: yes
+  block:
+
+  # subscription-manager repos --enable rhel-server-rhscl-7-rpms
+  - include_tasks: ../bootstrap/scl-enable.yml
+    vars:
+      scl_pkgs: "{{ apache_scl_pkgs }}"
+
+  - debug:
+      var: apache_modules
+
+  - name: install apache modules
+    package:
+      name: "{{ apache_packages }}"
+
+  - name: set php security stuff
+    template:
+      src: templates/php_overrides.ini
+      dest: "/etc/php.d/php_overrides.ini"
+      owner: root
+      group: root
+      mode: 0644
+    notify:
+      - restart apache
+    when:
+      - ansible_distribution == 'RedHat'
+    tags:
+      - pkgs
+
+  - name: repair the expected paths for tools that won't accept change
+    file:
+      src: '{{ item.src }}'
+      dest: '{{ item.dest }}'
+      state: link
+    with_items:
+      - { src: '/opt/rh/httpd24/root/etc/httpd/conf.d/rh-php56-php.conf', dest: '/etc/httpd/conf.d/rh-php56-php.conf' }
+      - { src: '/opt/rh/httpd24/root/etc/httpd/conf.modules.d/10-rh-php56-php.conf', dest: '/etc/httpd/conf.modules.d/10-rh-php56-php.conf' }
+      - { src: '/opt/rh/httpd24/root/usr/lib64/httpd/modules/librh-php56-php5.so', dest: '/etc/httpd/modules/librh-php56-php5.so' }
+
+  - name: "fixup scl binaries for {{ item.pkg }}"
+    copy:
+      content: |
+          #!/bin/bash
+          source scl_source enable {{ item.pkg }}
+          exec {{ item.src }} "$@"
+      dest: '{{ item.dest }}'
+      owner: root
+      group: root
+      mode: 0755
+    with_items:
+      - src: '/opt/rh/rh-php56/root/usr/bin/php'
+        dest: '/usr/bin/php'
+        pkg: rh-php56
+
+# cp /opt/rh/httpd24/root/etc/httpd/conf.d/rh-php70-php.conf /etc/httpd/conf.d/
+# cp /opt/rh/httpd24/root/etc/httpd/conf.modules.d/10-rh-php70-php.conf /etc/httpd/conf.modules.d/
+# cp /opt/rh/httpd24/root/etc/httpd/modules/librh-php70-php5.so /etc/httpd/modules/

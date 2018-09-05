@@ -1,0 +1,39 @@
+---
+
+- tags: [ apache ]
+  block:
+
+    - name: create a local variable to use for vhosts
+      set_fact:
+        vhost: "{{ vhost_loop }}"
+
+    - name: install httpd.conf file for {{ vhost.ServerName }}
+      template:
+        src: conf/httpd-conf.j2
+        dest: "{{ apache_site_conf_path }}/{{ vhost.ServerName }}.conf"
+        owner: root
+        group: root
+        mode: 0644
+      register: vhost_template_conf
+      notify:
+        - restart apache
+
+    - name: link the en2ensite type scripts in
+      file:
+        src: "{{ apache_site_conf_path }}/{{ vhost.ServerName }}.conf"
+        dest: "{{ apache_site_enabled_conf_path }}/{{ vhost.ServerName }}.conf"
+        state: link
+
+    - name: guard against trying to restart with broken config
+      shell: "{{ apache_conftest }} || true"
+      register: conftest_check
+      changed_when: "'failed' in conftest_check.stdout"
+
+    - name: forcing restart of apache for this vhost
+      service:
+        name: "{{ apache_service }}"
+        state: restarted
+      when:
+        - "'force_immediate_update' in vhost"
+        - vhost_template_conf.changed
+        - "'failed' not in conftest_check.stdout"

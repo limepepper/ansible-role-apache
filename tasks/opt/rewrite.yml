@@ -1,0 +1,20 @@
+---
+
+- tags: [ zabbix, zabbix-agent, zabbix-firewall, zabbix-agent-firewall ]
+  become: yes
+  when: ansible_os_family == 'RedHat'
+  block:
+
+  - debug:
+      msg: rewrite seems to be already enabled on centos
+
+- tags: [ apache ]
+  when: ansible_os_family == 'Debian'
+  block:
+
+    - name: apache2 status module
+      apache2_module:
+        name: rewrite
+        state: present
+      notify:
+        - restart apache

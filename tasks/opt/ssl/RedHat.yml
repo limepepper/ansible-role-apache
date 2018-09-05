@@ -1,0 +1,11 @@
+---
+
+- tags: [ apache, ssl ]
+  become: yes
+  block:
+
+  - name: install SSL dependencies
+    package:
+      name: "{{ apache_packages_ssl }}"
+    notify:
+      - restart apache

@@ -1,0 +1,50 @@
+---
+
+- tags: [ apache, suite ]
+  become: true
+  block:
+
+    - name: install any repo provider packages before the main phase
+      package:
+        name: "{{ apache_packages_repo }}"
+      tags: [ pkgs ]
+
+    - name: "install apache deps ({{ ansible_distribution }})"
+      package:
+        name: "{{ apache_packages }}"
+
+    - name: create the Debian style available/enabled conf dirs
+      file:
+        path : "{{ apache_server_root }}/{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+      with_items:
+        - sites-enabled
+        - sites-available
+        # - mods-enabled
+        # - mods-available
+        # - conf-enabled
+        # - conf-available
+
+    - name: httpd server conf with sites/mods/conf Imports
+      template:
+        src: conf/server-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.conf
+        dest: "{{ apache_main_conf_file }}"
+        owner: root
+        group: root
+        mode: 0644
+      notify:
+        - restart apache
+
+    # @TODO we is probably going to have to re-right the main config so move this
+    # - name: enable sites available/enabled dirs
+    #   template:
+    #     src: conf/available-enabled-directories.conf
+    #     dest: "{{ apache_conf_d_dir }}/xx_sites_enabled.conf"
+    #     owner: root
+    #     group: root
+    #     mode: 0644
+    #   notify:
+    #   - restart apache

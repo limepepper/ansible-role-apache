@@ -1,0 +1,27 @@
+---
+
+- tags: [ apache, php ]
+  block:
+
+  - debug:
+      var: apache_profile
+
+  - name: install PHP dependencies
+    package:
+      name: "{{ php_packages }}"
+    notify:
+      - restart apache
+    tags: [pkgs]
+
+  - name: set php security stuff
+    template:
+      src: php_overrides.ini
+      dest: "/etc/php.d/php_overrides.ini"
+      owner: root
+      group: root
+      mode: 0644
+    notify:
+      - restart apache
+    when:
+      - ansible_distribution == 'RedHat'
+    tags: [pkgs]

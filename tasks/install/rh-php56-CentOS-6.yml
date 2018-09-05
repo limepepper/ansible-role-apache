@@ -1,0 +1,63 @@
+---
+
+- tags: [ apache, suite ]
+  become: yes
+  block:
+
+  - include_tasks: ../bootstrap/scl-enable.yml
+    vars:
+      scl_pkgs: "{{ apache_scl_pkgs }}"
+
+  - name: install apache deps
+    package:
+      name: "{{ apache_packages }}"
+    notify:
+    - restart apache
+
+  - name: set php security stuff
+    template:
+      src: templates/php_overrides.ini
+      dest: "/etc/php.d/php_overrides.ini"
+      owner: root
+      group: root
+      mode: 0644
+    notify:
+    - restart apache
+    tags:
+      - pkgs
+
+  - name: repair the expected paths for tools that won't accept change
+    file:
+      src: '{{ item.src }}'
+      dest: '{{ item.dest }}'
+      state: link
+    with_items:
+      - { src: '/etc/rc.d/init.d/httpd24-httpd', dest: '/etc/init.d/httpd' }
+      # - { src: '/opt/rh/httpd24/root/usr/sbin/httpd', dest: '/usr/sbin/httpd' }
+
+  - name: "fixup scl binaries for {{ item.pkg }}"
+    copy:
+      content: |
+          #!/bin/bash
+          source scl_source enable {{ item.pkg }}
+          exec {{ item.src }} "$@"
+      dest: '{{ item.dest }}'
+      owner: root
+      group: root
+      mode: 0755
+    with_items:
+      - src: '/opt/rh/rh-php56/root/usr/bin/php'
+        dest: '/usr/bin/php'
+        pkg: rh-php56
+      - src: '/opt/rh/httpd24/root/usr/sbin/httpd'
+        dest: '/usr/sbin/httpd'
+        pkg: httpd24
+
+  - name: create a list of logfiles for this host for global log shipper
+    set_fact:
+      logfiles: |
+          {{ ( apache_system_logs | fixup_file_list(apache_log_path) )
+              +  logfiles|default([]) }}
+    notify: logfiles_changed
+    tags: [ logfiles ]
+    changed_when: true

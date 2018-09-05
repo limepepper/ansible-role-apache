@@ -1,0 +1,27 @@
+---
+
+- tags: [ apache ]
+  block:
+
+    - debug:
+        msg: |
+          In the Debian ssl boot strapper
+
+    - apache2_module:
+        state: present
+        name: ssl
+
+        # src: /file/to/link/to
+        # dest: /path/to/symlink
+        # - file:
+        #     src: '../mods-available/{{ item }}'
+        #     dest: '{{ apache_mods_enabled }}/{{ item.dest }}'
+        #     state: link
+        #   with_items:
+        #     - setenvif.conf
+        #     - setenvif.load
+        #     - socache_shmcb.load
+        #     - mime.load
+        #     - mime.conf
+        #     - ssl.load
+        #     - ssl.conf

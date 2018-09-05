@@ -1,0 +1,28 @@
+---
+
+- tags: [ apache, suite ]
+  become: yes
+  block:
+
+
+  - include_tasks: default-Linux.yml
+    tags: always
+
+  - name: "brain surgery on the main apache config file {{ ansible_distribution }}"
+    template:
+      src: "{{ replate_apache_config_file }}"
+      dest: "{{ apache_main_conf_file }}"
+    with_first_found:
+    - files:
+      - "conf/server-{{ ansible_distribution }}-{{ ansible_distribution_version }}.conf"
+      - "conf/server-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.conf"
+      - "conf/server-{{ ansible_distribution }}.conf"
+      - "conf/server-{{ ansible_os_family }}.conf"
+      - "conf/server-{{ ansible_system }}.conf"
+      # skip: true
+      paths:
+        - "{{ role_path }}/templates"
+    loop_control:
+      loop_var: replate_apache_config_file
+    # tags: [ always ]
+

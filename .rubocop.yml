@@ -1,7 +1,17 @@
 ---
+
 Bundler/DuplicatedGem:
   Exclude:
     - 'Gemfile'
 Style/GlobalVars:
   Exclude:
-    - 'vagrant/vagrant.rb'
+    - '.vagrant/vagrant.rb'
+Style/SafeNavigation:
+  Exclude:
+    - 'test/integration/**/*'
+Metrics/LineLength:
+  Exclude:
+    - 'test/integration/**/*'
+Metrics/BlockLength:
+  Exclude:
+    - 'test/integration/**/*'

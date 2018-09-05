@@ -1,0 +1,47 @@
+---
+
+
+apache_version: 2.4
+php_version: 7
+
+apache_user: apache
+apache_group: apache
+
+# apache_suite: default
+apache_scl_pkgs:
+  - rh-php70
+  - httpd24
+# extra_package_repos: centos-release-scl
+# php_package_repo: centos-release-scl
+apache_service: httpd24-httpd
+#  apache_daemon: apache2
+apache_daemon_path: /opt/rh/httpd24/root/usr/sbin
+apache_log_path: /var/log/httpd24
+apache_server_root: /opt/rh/httpd24/root/etc/httpd
+apache_site_conf_path: /opt/rh/httpd24/root/etc/httpd/conf.d
+apache_conf_path: /opt/rh/httpd24/root/etc/httpd/conf
+apache_conf_file: /opt/rh/httpd24/root/etc/httpd/conf/httpd.conf
+apache_main_conf_file: /opt/rh/httpd24/root/etc/httpd/conf/httpd.conf
+apache_apachectl: /opt/rh/httpd24/root/usr/sbin/apachectl
+apache_conftest: /opt/rh/httpd24/root/usr/sbin/apachectl  configtest
+apache_sites_available: /opt/rh/httpd24/root/etc/httpd/sites-available
+apache_sites_available_dir: /opt/rh/httpd24/root/etc/httpd/sites-available
+apache_sites_enabled: /opt/rh/httpd24/root/etc/httpd/sites-enabled
+apache_site_enabled_conf_path: /opt/rh/httpd24/root/etc/httpd/sites-enabled
+
+
+apache_package_name: httpd24-httpd
+php_package_conf_dir: /etc/opt/rh/rh-php70/php.d
+apache_packages:
+  - httpd24-httpd-tools
+  - httpd24-httpd
+apache_packages_ssl:
+  - httpd24-mod_ssl
+php_packages:
+  - rh-php70
+  - rh-php70-php
+  - rh-php70-php-gd
+  - rh-php70-php-xml
+  - rh-php70-php-mbstring
+  - rh-php70-php-bcmath
+  - rh-php70-php-mysqlnd

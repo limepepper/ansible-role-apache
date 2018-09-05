@@ -1,0 +1,48 @@
+---
+
+- tags: [ apache ]
+  block:
+
+  - name: report of the current profile x distro matrix
+    debug:
+      msg: |
+
+        Profile:          {{ apache_profile }}
+
+        Release Version:  {{ ansible_distribution }}-{{ ansible_distribution_version }}
+        Major version:    {{ ansible_distribution }}-{{ ansible_distribution_major_version }}
+        Destribution:     {{ ansible_distribution }}
+        OS family:        {{ ansible_os_family }}
+        System:           {{ ansible_system }}
+
+        Release:          {{ ansible_distribution_release }}
+        Hostname:         {{ ansible_hostname }}
+        Fqdn:             {{ ansible_fqdn }}
+
+        Ansible version:  {{ ansible_version.major }}.{{ ansible_version.minor }}.{{ ansible_version.revision }}
+
+  - name: "merge distro vars for ({{ ansible_distribution }} and {{ apache_profile }})"
+    include_vars: "{{ distro_specific_vars }}"
+    with_items:
+      - "{{ apache_profile }}-{{ ansible_system }}.yml"
+      - "{{ apache_profile }}-{{ ansible_os_family }}.yml"
+      - "{{ apache_profile }}-{{ ansible_distribution }}.yml"
+      - "{{ apache_profile }}-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+      - "{{ apache_profile }}-{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
+    when: (role_path + '/vars/' + distro_specific_vars) is is_file
+    loop_control:
+      loop_var: distro_specific_vars
+    tags: always
+
+  - name: call the distro/suite specific tasks ({{ ansible_distribution }} and {{ apache_profile }})
+    include_tasks: "{{ include_suite_tasks }}"
+    with_first_found:
+    - files:
+        - "{{ apache_profile }}-{{ ansible_distribution }}-{{ ansible_distribution_version}}.yml"
+        - "{{ apache_profile }}-{{ ansible_distribution }}-{{ ansible_distribution_major_version}}.yml"
+        - "{{ apache_profile }}-{{ ansible_distribution }}.yml"
+        - "{{ apache_profile }}-{{ ansible_os_family }}.yml"
+        - "{{ apache_profile }}-{{ ansible_system }}.yml"
+    loop_control:
+      loop_var: include_suite_tasks
+    tags: always

@@ -1,0 +1,19 @@
+---
+
+
+
+extra_package_repos: []
+
+apache:
+  modules: []
+  adminips: []
+
+apache_modules: []
+
+apache_logging_debug: False
+
+apache_scl_pkgs: []
+apache_vhosts_ssl: []
+apache_vhosts: []
+apache_opts: []
+
