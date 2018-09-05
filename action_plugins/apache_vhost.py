@@ -9,7 +9,9 @@ from ansible import constants as C
 from ansible.module_utils._text import to_bytes, to_native, to_text
 # from ansible.plugins.action.ce import ActionModule as _ActionModule
 # from ansible.plugins.action.template import ActionModule as _ActionModule
-from ansible.plugins.action.copy import _create_remote_file_args
+# from ansible.plugins.action.copy import _create_remote_file_args
+# from ansible.plugins.action.copy import REAL_FILE_ARGS
+from ansible.module_utils.basic import FILE_COMMON_ARGUMENTS
 
 import inspect
 import pprint
@@ -19,27 +21,39 @@ import tempfile
 import shutil
 
 
+def _create_remote_file_args(module_args):
+    """remove keys that are not relevant to file"""
+    return dict((k, v) for k, v in module_args.items() if k in REAL_FILE_ARGS)
+
+
+REAL_FILE_ARGS = frozenset(FILE_COMMON_ARGUMENTS.keys()).union(
+                          ('state', 'path', '_original_basename', 'recurse', 'force',
+                           '_diff_peek', 'src')).difference(
+                          ('content', 'decrypt', 'backup', 'remote_src', 'regexp', 'delimiter',
+                           'directory_mode', 'unsafe_writes'))
+
+
 class ActionModule(ActionBase):
     def run(self, tmp=None, task_vars=None):
 
-        pp = pprint.PrettyPrinter(indent=4)
+        # pp = pprint.PrettyPrinter(indent=4)
 
-        for name in globals():
-            pp.pprint(name)
+        # for name in globals():
+        #     pp.pprint(name)
 
-        results = []
-        changed = True
+        changed = False
 
         if task_vars is None:
             task_vars = dict()
 
         result = super(ActionModule, self).run(tmp, task_vars)
+        result['results'] = []
 
         server_name = self._task.args.get('ServerName', None)
-        server_aliases = self._task.args.get('ServerAliases', None)
-        document_root = self._task.args.get('DocumentRoot', None)
-        state = self._task.args.get('state', None)
-        # force = boolean(self._task.args.get('force', True), strict=False)
+        # server_aliases = self._task.args.get('ServerAliases', None)
+        # document_root = self._task.args.get('DocumentRoot', None)
+        # state = self._task.args.get('state', None)
+        # # force = boolean(self._task.args.get('force', True), strict=False)
 
         task_vars['vhost'] = {}
         task_vars['vhost']['Listen'] = self._task.args.get('Listen', None)
@@ -51,15 +65,47 @@ class ActionModule(ActionBase):
             'DocumentRoot', None)
         dest_path = task_vars['apache_sites_available_dir']
 
+        path_stack = self._task.get_search_path()
+
+        path_stack = path_stack + \
+            [os.path.join(x, 'limepepper.apache')
+             for x in getattr(C, 'DEFAULT_ROLES_PATH')]
+
+        # if the task is in a role, add that to the search path
+        if self._task._role:
+            path_stack = path_stack + self._task._role._role_path
+
+        task_dir_parent = os.path.join(
+            os.path.dirname(self._task.get_path()), os.pardir)
+
+        if os.path.exists(
+                os.path.join(
+                    task_dir_parent, 'tasks')) and task_dir_parent not in path_stack:
+            path_stack.append(task_dir_parent)
+
+        src = self._loader.path_dwim_relative_stack(
+            path_stack,
+            'templates/conf',
+            'httpd-conf.j2')
+
         #
         tmpl_args = dict(
-            src='/home/tomhodder/Dropbox/bin/ansible/roles/limepepper.apache/templates/conf/httpd-conf.j2',
+            src=src,
             dest="{0}/{1}.conf".format(dest_path, server_name)
         )
         # self._task.args.copy()
 
         # call the template action on our params
-        results.append(WrapTemplate(self, tmpl_args).run(task_vars=task_vars))
+        ret1 = WrapTemplate(
+            self, tmpl_args).run(task_vars=task_vars)
+
+        changed=changed or ret1['changed']
+
+        result['results'].append(ret1)
+
+        print("result")
+        print(result)
+        print("")
 
         src_path = task_vars['apache_sites_available_dir']
         dest_path = task_vars['apache_site_enabled_conf_path']
@@ -79,11 +125,21 @@ class ActionModule(ActionBase):
                              "mod failed failed." % module_return)
 
         module_executed = True
+
         changed = changed or module_return.get('changed', False)
 
-        results.append(module_return)
+        # changed = changed or module_return['changed']
 
-        return dict(results=results, changed=True)
+        result['results'].append(module_return)
+        print("module_return changed")
+        print(module_return['changed'])
+
+        print("result")
+        print(result)
+
+        result['changed'] = changed
+
+        return result
 
 #
 # BOILERPLATE STUFF THAT WOULD NORMALLY BE IN A module
@@ -97,8 +153,8 @@ class BaseWrap:
 
     def get_template_path(self):
 
-        print("apache_vhost original path is :")
-        print(self.action._original_path)
+        # print("apache_vhost original path is :")
+        # print(self.action._original_path)
 
         mypath = os.path.abspath(
             os.path.join(
@@ -123,7 +179,7 @@ class WrapSymlink(BaseWrap):
         self.task = action._task
         self.args = args
 
-        print(self.args)
+        # print(self.args)
 
     def run(self, task_vars):
 
@@ -131,7 +187,7 @@ class WrapSymlink(BaseWrap):
         new_task.args = self.args
 
         # Use file module to create these
-        print(self.args)
+        # print(self.args)
         new_module_args = _create_remote_file_args(self.args)
         print(new_module_args)
         # new_module_args['path'] = os.path.join(dest, dest_path)
@@ -168,15 +224,15 @@ class WrapTemplate(BaseWrap):
 
         new_task.args = self.args
 
-        print("templar loader environment search path")
-        print(self.action._templar.environment.loader.searchpath)
+        # print("templar loader environment search path")
+        # print(self.action._templar.environment.loader.searchpath)
 
         new_basedir = self.get_template_path()
 
         self.action._templar.environment.loader.searchpath = [new_basedir]
 
-        print("templar loader environment search path - updated")
-        print(self.action._templar.environment.loader.searchpath)
+        # print("templar loader environment search path - updated")
+        # print(self.action._templar.environment.loader.searchpath)
 
         loader = self.action._shared_loader_obj.action_loader
         action = loader.get('template',
@@ -189,8 +245,8 @@ class WrapTemplate(BaseWrap):
 
         action._loader._basedir = new_basedir
 
-        print("got vhost from task_vars")
-        print(task_vars.get('vhost', []))
+        # print("got vhost from task_vars")
+        # print(task_vars.get('vhost', []))
 
         return action.run(task_vars=task_vars)
 
@@ -201,5 +257,3 @@ class WrapCopy():
 
         self.module = module
         self._p = self.module.params
-
-        return result

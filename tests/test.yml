@@ -23,6 +23,20 @@
           import_role:
             name: '{{playbook_dir}}/..'
 
+        - name: create the test http home dir directory
+          file:
+            name: /var/www/mywordpresssite2.com
+            state: directory
+          notify:
+            - reload apache
+
+        - copy:
+            content: |
+              <html><body><h2>This is a test page YYY</h2></body></html>
+            dest: /var/www/mywordpresssite2.com/index.html
+          notify:
+            - reload apache
+
         - name: the http vhost to stage the http challenge response
           apache_vhost:
             ServerName: mywordpresssite2.com
