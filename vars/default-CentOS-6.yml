@@ -2,4 +2,4 @@
 
 apache_version: 2.2
 php_version: 5.3.3
-
+apache_conftest: /etc/init.d/httpd configtest

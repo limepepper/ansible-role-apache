@@ -1,16 +1,19 @@
 ---
 
-apache:
-  modules: []
-  adminips: []
-apache_modules: []
-webserver_options: []
-php_version: stock
-apache_version: stock
-apache_suite: default
-apache_scl_pkgs: []
+apache_profile: default
 
-logging_debug: False
+apache_port_http: 80
+apache_port_https: 443
+
+apache_server_email: admin@localhost
 
 apache_vhosts_ssl: []
 apache_vhosts: []
+apache_packages_ssl: []
+apache_packages_repo: []
+
+apache:
+  modules: []
+  adminips: []
+
+apache_opts: []

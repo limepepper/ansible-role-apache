@@ -1,7 +1,7 @@
 ---
 
 - tags: main-run
-  become: True
+  become: true
   block:
 
   - name: install epel

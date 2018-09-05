@@ -1,10 +1,7 @@
-
-
 # my_services = yaml(content: inspec.profile.file('services.yml')).params
 vars_json = json('/var/cache/ansible/attributes/hostvars.json')
 
 vars = vars_json.params
-
 
 control 'check-attributes-1' do
   impact 0.6
@@ -15,7 +12,6 @@ control 'check-attributes-1' do
     #  its('mode') { should cmp 0644 }
   end
 end
-
 
 control 'check-vhost-ssl' do
   impact 0.6
@@ -28,14 +24,13 @@ control 'check-vhost-ssl' do
     it { should be_running }
   end
 
-  url = "https://localhost:443/index.html"
+  url = 'https://localhost:443/index.htm'
 
   describe http(url, ssl_verify: false) do
     its('status') { should eq 200 }
     its('body') { should match(/This is a test page YYY/) }
     # its('headers.name') { should eq 'header' }
-    its('headers.Content-Type') { should match(/text\/html/) }
-
+    its('headers.Content-Type') { should match(%r{text\/html}) }
   end
 
   # describe command("echo | openssl s_client -servername #{vars['certbot_test_domain']} -connect #{vars['certbot_test_domain']}:443 2>/dev/null | openssl x509 -noout -subject") do

@@ -7,53 +7,52 @@
     # boilerplate
   - name: bootstrap enough that ansible can run most modules
     include_tasks: "bootstrap/main.yml"
-    when: bootstrap_done is not defined
     tags: [ bootstrap ]
 
     # boilerplate
+    # using a custom var and task loader in the main script..
   # - include_tasks: bootstrap/distro-vars-import.yml
   #   tags: always
 
     ## START OF MAIN TASKS SECTION ##
 
     # this install the apache package
-  - include_tasks: suite/main.yml
-    tags: always
+  - include_tasks: install/main.yml
+    # tags: always
 
-  - include_tasks: configure/ssl/main.yml
-    # when:
-    #   - apache_vhosts_ssl | length
-    tags: always
+  - debug:
+      var: apache_opts
 
-  # if sites was provided as a list, loop over the instances
-  - include_tasks: configure/vhost-ssl.yml
+  #{{ role_path }}/vars
+  - name: install configurables
+    include_tasks: "opt/{{ configurable_item }}.yml"
+    with_items: "{{ apache_opts }}"
     loop_control:
-      loop_var: vhost_loop
-    with_items: "{{ apache_vhosts_ssl }}"
-    tags: always
+      loop_var: configurable_item
+    # tags: always
 
-  - include_tasks: configure/vhost.yml
-    loop_control:
-      loop_var: vhost
-    with_items: "{{ apache_vhosts }}"
-    tags: always
+  - name: guard against trying to restart with broken config
+    shell: "{{ apache_conftest }} || true"
+    register: conftest_check
+    changed_when: "'failed' in conftest_check.stdout"
 
-  - service:
+  - name: start {{ apache_service }} service after installing and loading mods
+    service:
       name: "{{ apache_service }}"
       state: started
       enabled: yes
+    when: "'failed' not in conftest_check.stdout"
+
+  - include_tasks: opt/vhost-ssl.yml
+    loop_control:
+      loop_var: vhost_loop
+    with_items: "{{ apache_vhosts_ssl }}"
+    # tags: always
+
+  - include_tasks: opt/vhost.yml
+    loop_control:
+      loop_var: vhost_loop
+    with_items: "{{ apache_vhosts }}"
+    # tags: always
 
     ## END OF MAIN TASKS SECTION ##
-
-  # # boilerplate
-  # # the idea here, is that if any of the tasks fail, it will add useful
-  # # troubleshooing tools to the build.
-  # rescue:
-  # - debug:
-  #     msg: "I ONLY WHEN !!!"
-
-  # - include_tasks: bootstrap/distro-debug-packages.yml
-
-  # - fail:
-  #     msg: "Forcing a fail due to previous errors."
-  #   when: true

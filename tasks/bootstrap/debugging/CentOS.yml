@@ -1,10 +1,9 @@
 ---
 
-- become: True
+- become: true
   block:
 
-    # pip is in EPEL
-  - name: install EPEL for CentOS
+  - name: install a bunch of tools useful for debugging
     package:
       name:
         - mlocate
@@ -24,11 +23,11 @@
         - lsof
         - nmap
         - jq
+        - inotify-tools
 
-    # update the mlocate database in the background
+  # update the mlocate database in the background
   - name: update the mlocate database
     command: updatedb
     async: 1000
     poll: 0
     changed_when: False
-

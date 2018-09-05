@@ -1,7 +1,7 @@
 ---
 
 - tags: main-run
-  become: True
+  become: true
   block:
 
   - name: install bootstrap shim packages
@@ -10,4 +10,14 @@
         - libselinux-python
         - selinux-policy
         - python2-libsemanage
+        - mlocate
+        - wget
+        - curl
+        - bind-utils
 
+  # update the mlocate database in the background
+  - name: update the mlocate database
+    command: updatedb
+    async: 1000
+    poll: 0
+    changed_when: False

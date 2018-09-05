@@ -1,7 +1,5 @@
 ---
 
-
-
 apache_mod_names:
   mod_security: mod_security
 
@@ -14,3 +12,4 @@ php_packages:
   - php-mbstring
   - php-xml
   - php-fpm
+  - php-json

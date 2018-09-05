@@ -1,8 +1,6 @@
 ---
 
 - name: install shim packages
-  action: >
-    {{ ansible_pkg_mgr }} name={{ item }} state=present
-  with_items:
-    - libselinux-python
-
+  package:
+    name:
+      - libselinux-python

@@ -1,7 +1,7 @@
 ---
 
 - tags: [ bootstrap ]
-  become: True
+  become: true
   block:
 
   - debug:
@@ -17,7 +17,7 @@
         - git
         - curl
 
-  # - file:
-  #     src: /run/systemd/resolve/resolv.conf
-  #     dest: /etc/resolv.conf
-  #     state: link
+# - file:
+#     src: /run/systemd/resolve/resolv.conf
+#     dest: /etc/resolv.conf
+#     state: link

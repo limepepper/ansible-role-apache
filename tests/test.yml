@@ -48,3 +48,12 @@
             dest: "/var/cache/ansible/attributes/hostvars.json"
           changed_when: false
           tags: always
+
+      rescue:
+
+        - name: include the debugger script
+          include_tasks: ../bootstrap/distro-debug-packages.yml
+          tags: always
+
+        - fail:
+            msg: "force a failure due to previous errors"

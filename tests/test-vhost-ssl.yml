@@ -101,16 +101,17 @@
             privatekey_path: "{{ key }}"
             provider: assertonly
 
-        # - name: Verify that an existing certificate was issued by the Let's Encrypt CA and is currently still valid
-        #   openssl_certificate:
-        #     path: /etc/ssl/crt/example.com.crt
-        #     provider: assertonly
-        #     issuer:
-        #       O: Let's Encrypt
-        #     has_expired: False
+            # - name: Verify that an existing certificate was issued by the
+            # Let's Encrypt CA and is currently still valid
+            #   openssl_certificate:
+            #     path: /etc/ssl/crt/example.com.crt
+            #     provider: assertonly
+            #     issuer:
+            #       O: Let's Encrypt
+            #     has_expired: False
 
-#/etc/pki/tls/certs/localhost.crt
-#/etc/pki/tls/private/localhost.key
+      # /etc/pki/tls/certs/localhost.crt
+      # /etc/pki/tls/private/localhost.key
 
       # for the purposes of testing and debugging, write out the hostvars json
       always:
@@ -126,6 +127,7 @@
             dest: "/var/cache/ansible/attributes/hostvars.json"
           changed_when: false
           tags: always
+
       rescue:
         - debug:
             msg: "As the run has failed, I am going to install debugging utils"
@@ -134,3 +136,6 @@
             name: '{{playbook_dir}}/..'
             tasks_from: bootstrap/distro-debug-packages.yml
           tags: always
+
+        - fail:
+            msg: "force a failure due to previous errors"

@@ -1,6 +1,6 @@
 ---
 
-- become: True
+- become: true
   block:
 
   - yum:
@@ -21,12 +21,11 @@
         - procps
         - lsof
         - nmap
+        - inotify-tools
 
-    # update the mlocate database in the background
+  # update the mlocate database in the background
   - name: update the mlocate database
     command: updatedb
     async: 1000
     poll: 0
     changed_when: False
-
-

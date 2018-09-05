@@ -1,8 +1,5 @@
 ---
 
-- debug:
-    msg: "here is the message"
-
 - name: debian-9 annoyances block
   become: yes
   tags: [ annoyances ]
@@ -32,6 +29,9 @@
           - whois
           - net-tools
           - vim-tiny
+          - jq
+          - dnsutils
+          - inotify-tools
 
     # debian-9 compatible seems to have mouse=a set
     # annoyance scale (4/11)
@@ -40,3 +40,10 @@
         name: vi
         path: /usr/bin/vim.tiny
       when: false
+
+    # update the mlocate database in the background
+    - name: update the mlocate database
+      command: updatedb
+      async: 1000
+      poll: 0
+      changed_when: False
