@@ -1,10 +1,10 @@
 ---
 
-- tags: [ always ]
-  when: lookup('env', '_DTOOLS')
+- when: lookup('env', '_DTOOLS')
   block:
 
     - include_tasks: distro-debug-packages.yml
+      tags: [ always ]
 
 - tags: [ bootstrap ]
   when: bootstrap_done is not defined

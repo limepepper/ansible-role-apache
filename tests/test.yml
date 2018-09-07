@@ -68,6 +68,3 @@
         - name: include the debugger script
           include_tasks: ../bootstrap/distro-debug-packages.yml
           tags: always
-
-        - fail:
-            msg: "force a failure due to previous errors"

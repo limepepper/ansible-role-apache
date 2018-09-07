@@ -37,6 +37,8 @@
         - debug:
             msg: "As the run has failed, I am going to install debugging utils"
 
+        - include_tasks: "pkg-tools/main.yml"
+
         - name: "gather distro vars ({{ ansible_distribution }})"
           include_tasks: "{{ distro_specific_tools }}"
           with_first_found:

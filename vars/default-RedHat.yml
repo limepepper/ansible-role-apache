@@ -31,9 +31,6 @@ apache_packages_ssl:
 
 apache_lib_dir: /etc/httpd/conf
 apache_log_path: /var/log/httpd
-apache_site_conf_path: /etc/httpd/sites-available
-apache_sites_available_dir: /etc/httpd/sites-available
-apache_site_enabled_conf_path: /etc/httpd/sites-enabled
 apache_conf_d_dir: /etc/httpd/conf.d
 apache_conf_path: /etc/httpd/conf
 apache_conf_file: /etc/httpd/conf/httpd.conf
