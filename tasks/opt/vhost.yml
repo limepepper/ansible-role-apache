@@ -21,7 +21,7 @@
     - name: link the en2ensite type scripts in
       file:
         src: "{{ apache_site_conf_path }}/{{ vhost.ServerName }}.conf"
-        dest: "{{ apache_site_enabled }}/{{ vhost.ServerName }}.conf"
+        dest: "{{ apache_sites_enabled }}/{{ vhost.ServerName }}.conf"
         state: link
 
     - name: guard against trying to restart with broken config

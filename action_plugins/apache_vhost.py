@@ -108,7 +108,7 @@ class ActionModule(ActionBase):
         print("")
 
         src_path = task_vars['apache_sites_available']
-        dest_path = task_vars['apache_site_enabled']
+        dest_path = task_vars['apache_sites_enabled']
 
         tmpl_args = dict(
             src='{0}/{1}.conf'.format(src_path, server_name),
