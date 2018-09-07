@@ -53,7 +53,7 @@ class ActionModule(ActionBase):
         task_vars['vhost']['SSLCertificateChainFile'] = self._task.args.get(
             'SSLCertificateChainFile', None)
 
-        dest_path = task_vars['apache_sites_available_dir']
+        dest_path = task_vars['apache_sites_available']
 
         #
         tmpl_args = dict(
@@ -67,7 +67,7 @@ class ActionModule(ActionBase):
 
         # dest = self._remote_expand_user(dest)
 
-        src_path = task_vars['apache_sites_available_dir']
+        src_path = task_vars['apache_sites_available']
         dest_path = task_vars['apache_site_enabled_conf_path']
 
         tmpl_args = dict(

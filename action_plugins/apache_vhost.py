@@ -63,7 +63,7 @@ class ActionModule(ActionBase):
             'ServerAliases', None)
         task_vars['vhost']['DocumentRoot'] = self._task.args.get(
             'DocumentRoot', None)
-        dest_path = task_vars['apache_sites_available_dir']
+        dest_path = task_vars['apache_sites_available']
 
         path_stack = self._task.get_search_path()
 
@@ -107,7 +107,7 @@ class ActionModule(ActionBase):
         print(result)
         print("")
 
-        src_path = task_vars['apache_sites_available_dir']
+        src_path = task_vars['apache_sites_available']
         dest_path = task_vars['apache_site_enabled_conf_path']
 
         tmpl_args = dict(
