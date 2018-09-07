@@ -68,7 +68,7 @@ class ActionModule(ActionBase):
         # dest = self._remote_expand_user(dest)
 
         src_path = task_vars['apache_sites_available']
-        dest_path = task_vars['apache_site_enabled_conf_path']
+        dest_path = task_vars['apache_site_enabled']
 
         tmpl_args = dict(
             src='{0}/{1}-ssl.conf'.format(src_path, server_name),
