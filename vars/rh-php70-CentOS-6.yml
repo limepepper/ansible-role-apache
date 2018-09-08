@@ -18,7 +18,7 @@ apache_service: httpd24-httpd
 apache_daemon_path: /opt/rh/httpd24/root/usr/sbin
 apache_log_path: /var/log/httpd24
 apache_server_root: /opt/rh/httpd24/root/etc/httpd
-apache_site_conf_path: /opt/rh/httpd24/root/etc/httpd/conf.d
+apache_conf_d_dir: /opt/rh/httpd24/root/etc/httpd/conf.d
 apache_conf_path: /opt/rh/httpd24/root/etc/httpd/conf
 apache_conf_file: /opt/rh/httpd24/root/etc/httpd/conf/httpd.conf
 apache_main_conf_file: /opt/rh/httpd24/root/etc/httpd/conf/httpd.conf
@@ -26,8 +26,10 @@ apache_apachectl: /opt/rh/httpd24/root/usr/sbin/apachectl
 apache_conftest: /opt/rh/httpd24/root/usr/sbin/apachectl  configtest
 apache_sites_available: /opt/rh/httpd24/root/etc/httpd/sites-available
 apache_sites_enabled: /opt/rh/httpd24/root/etc/httpd/sites-enabled
-
-
+apache_mods_available: /opt/rh/httpd24/root/etc/httpd/mods-available
+apache_mods_enabled: /opt/rh/httpd24/root/etc/httpd/mods-enabled
+apache_conf_available: /opt/rh/httpd24/root/etc/httpd/conf-available
+apache_conf_enabled: /opt/rh/httpd24/root/etc/httpd/conf.d
 
 apache_package_name: httpd24-httpd
 php_package_conf_dir: /etc/opt/rh/rh-php70/php.d
@@ -44,3 +46,7 @@ php_packages:
   - rh-php70-php-mbstring
   - rh-php70-php-bcmath
   - rh-php70-php-mysqlnd
+
+apache:
+  modules: []
+  adminips: []

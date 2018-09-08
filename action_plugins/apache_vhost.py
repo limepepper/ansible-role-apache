@@ -97,6 +97,7 @@ class ActionModule(ActionBase):
         ret1 = WrapTemplate(
             self, tmpl_args).run(task_vars=task_vars)
 
+        print(ret1)
         changed=changed or ret1['changed']
 
         result['results'].append(ret1)

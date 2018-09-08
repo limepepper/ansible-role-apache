@@ -1,0 +1,97 @@
+---
+
+- set_fact:
+    dummy_csr: "/etc/ssl/csr/{{ test_domain }}.csr"
+    dummy_key: /etc/ssl/private/{{ test_domain }}.pem
+    dummy_cert: /etc/ssl/crt/{{ test_domain }}.crt
+
+- name: Generate an OpenSSL private key.
+  openssl_privatekey:
+    path: /etc/ssl/private/{{ test_domain }}.pem
+
+- openssl_csr:
+    path: /etc/ssl/csr/{{ test_domain }}.csr
+    privatekey_path: /etc/ssl/private/{{ test_domain }}.pem
+    country_name: GB
+    organization_name: "MOnkeyBadger LTd"
+    email_address: certs@limepepper.co.uk
+    common_name: "{{ test_domain }}"
+    subject_alt_name: 'DNS:{{ test_domain }},DNS:www.{{ test_domain }}'
+
+- name: Generate a Self Signed OpenSSL certificate
+  openssl_certificate:
+    path: /etc/ssl/crt/{{ test_domain }}.crt
+    privatekey_path: /etc/ssl/private/{{ test_domain }}.pem
+    csr_path: /etc/ssl/csr/{{ test_domain }}.csr
+    provider: selfsigned
+
+- name: create the test http home dir directory
+  file:
+    name: /var/www/{{ test_domain }}
+    state: directory
+  notify:
+    - reload apache
+
+- copy:
+    content: |
+      <html><body><h2>This is a test page YYY</h2></body></html>
+    dest: /var/www/{{ test_domain }}/index.html
+  notify:
+    - reload apache
+
+- name: add a https vhost for testing
+  apache_vhost_ssl:
+    ServerName: "{{ test_domain }}"
+    ServerAliases:
+      - "www.{{ test_domain }}"
+    DocumentRoot: "/var/www/{{ test_domain }}"
+    SSLCertificateKeyFile: /etc/ssl/private/{{ test_domain }}.pem
+    SSLCertificateFile: /etc/ssl/crt/{{ test_domain }}.crt
+    # SSLCertificateChainFile:
+  notify:
+    - reload apache
+  tags: ssl
+
+- debug:
+    msg: |
+      '\s{{ test_domain | replace(".", "\.") }}$'
+
+- name: add site aliases to hosts file
+  # delegate_to: 127.0.0.1
+  lineinfile:
+    path : /etc/hosts
+    regexp: '\s{{ test_domain | replace(".", "\.") }}$'
+    line: "127.0.0.1 {{ test_domain }}"
+    state: present
+  tags: hosts
+
+- name: add site aliases to hosts file
+  # delegate_to: 127.0.0.1
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '\swww\.{{ test_domain | replace(".", "\.") }}$'
+    line: "127.0.0.1 www.{{ test_domain }}"
+    state: present
+  tags: hosts
+
+#
+#   register: mywordpresssite2_com_vhost
+#   tags: dovhost
+#
+- name: Ensure that the existing certificate belongs to the specified private key
+  openssl_certificate:
+    path: "{{ dummy_cert }}"
+    privatekey_path: "{{ dummy_key }}"
+    provider: assertonly
+
+    # - name: Verify that an existing certificate was issued by the
+    # Let's Encrypt CA and is currently still valid
+    #   openssl_certificate:
+    #     path: /etc/ssl/crt/example.com.crt
+    #     provider: assertonly
+    #     issuer:
+    #       O: Let's Encrypt
+    #     has_expired: False
+
+# /etc/pki/tls/certs/localhost.crt
+# /etc/pki/tls/private/localhost.key

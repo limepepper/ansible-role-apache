@@ -101,3 +101,6 @@
         - name: include the debugger script
           include_tasks: ../tasks/bootstrap/distro-debug-packages.yml
           tags: always
+
+        - fail:
+            msg: force a fail, to inform test kitche etc

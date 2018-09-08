@@ -18,7 +18,7 @@
 
     # this install the apache package
   - include_tasks: install/main.yml
-    # tags: always
+    tags: always
 
   - debug:
       var: apache_opts

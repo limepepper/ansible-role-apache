@@ -27,10 +27,10 @@
     with_items:
       - sites-enabled
       - sites-available
-      # - mods-enabled
-      # - mods-available
-      # - conf-enabled
-      # - conf-available
+      - mods-enabled
+      - mods-available
+      - conf-enabled
+      - conf-available
 
   - name: httpd server conf with sites/mods/conf Imports
     template:
