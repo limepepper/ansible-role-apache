@@ -26,7 +26,7 @@
   - name: install ssl httpd.conf file for {{ vhost.ServerName }}
     template:
       src: conf/httpd-ssl-conf.j2
-      dest: "{{ apache_site_conf_path }}/{{ vhost.ServerName }}-ssl.conf"
+      dest: "{{ apache_sites_available }}/{{ vhost.ServerName }}-ssl.conf"
       owner: root
       group: root
       mode: 0644
@@ -36,7 +36,7 @@
 
   - name: link the en2ensite type scripts in
     file:
-      src: "{{ apache_site_conf_path }}/{{ vhost.ServerName }}-ssl.conf"
+      src: "{{ apache_sites_available }}/{{ vhost.ServerName }}-ssl.conf"
       dest: "{{ apache_sites_enabled }}/{{ vhost.ServerName }}-ssl.conf"
       state: link
     notify:

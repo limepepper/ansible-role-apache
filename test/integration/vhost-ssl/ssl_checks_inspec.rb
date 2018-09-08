@@ -24,8 +24,21 @@ control 'check-vhost-ssl' do
     it { should be_running }
   end
 
+  describe port(443) do
+    it { should be_listening }
+  end
+
   url = 'https://localhost:443'
-  
+
+  describe http(url, ssl_verify: false) do
+    its('status') { should be_in [200, 403] }
+    # its('body') { should match(/This is a test page YYY/) }
+    # its('headers.name') { should eq 'header' }
+    its('headers.Content-Type') { should match(%r{text\/html}) }
+  end
+
+  url = 'https://mywordpresssite2.com'
+
   describe http(url, ssl_verify: false) do
     its('status') { should eq 200 }
     its('body') { should match(/This is a test page YYY/) }
@@ -33,28 +46,46 @@ control 'check-vhost-ssl' do
     its('headers.Content-Type') { should match(%r{text\/html}) }
   end
 
-  # describe command("echo | openssl s_client -servername #{vars['certbot_test_domain']} -connect #{vars['certbot_test_domain']}:443 2>/dev/null | openssl x509 -noout -subject") do
-  #   its('stdout') { should match(/#{vars['certbot_test_domain']}/) }
-  #   its('exit_status') { should eq 0 }
-  # end
-
-  # describe apache do
-  #   its('user') { should eq vars['apache_user'] }
-  # end
-
-  # describe package('php') do
-  #   it { should_not be_installed }
-  # end
-
-  describe port(443) do
-    it { should be_listening }
+  describe command("echo | openssl s_client -servername mywordpresssite2.com -connect mywordpresssite2.com:443 2>/dev/null | openssl x509 -noout -subject") do
+    its('stdout') { should match(/MOnkeyBadger LTd/) }
+    its('exit_status') { should eq 0 }
   end
 
-  describe file('/tmp') do
-    it { should be_directory }
+  describe command("echo | openssl s_client -servername mywordpresssite2.com -connect mywordpresssite2.com:443 2>/dev/null | openssl x509 -noout -issuer") do
+    its('stdout') { should match(/MOnkeyBadger LTd/) }
+    its('exit_status') { should eq 0 }
   end
 
-  # describe file('hello.txt') do
-  #   its('content') { should match 'Hello World' }
-  # end
+  describe command("echo | openssl s_client -servername mywordpresssite2.com -connect mywordpresssite2.com:443 2>/dev/null | openssl x509 -noout -text -certopt no_subject,no_header,no_version,no_serial,no_signame,no_validity,no_issuer,no_pubkey,no_sigdump,no_aux") do
+    its('stdout') { should match(/DNS:mywordpresssite2.com/) }
+    its('stdout') { should match(/DNS:www.mywordpresssite2.com/) }
+    its('exit_status') { should eq 0 }
+  end
+
+
+  url = 'https://mywordpresssite3.com'
+
+  describe http(url, ssl_verify: false) do
+    its('status') { should eq 200 }
+    its('body') { should match(/This is a test page YYY/) }
+    # its('headers.name') { should eq 'header' }
+    its('headers.Content-Type') { should match(%r{text\/html}) }
+  end
+
+  describe command("echo | openssl s_client -servername mywordpresssite3.com -connect mywordpresssite2.com:443 2>/dev/null | openssl x509 -noout -subject") do
+    its('stdout') { should match(/MOnkeyBadger LTd/) }
+    its('exit_status') { should eq 0 }
+  end
+
+  describe command("echo | openssl s_client -servername mywordpresssite3.com -connect mywordpresssite2.com:443 2>/dev/null | openssl x509 -noout -issuer") do
+    its('stdout') { should match(/MOnkeyBadger LTd/) }
+    its('exit_status') { should eq 0 }
+  end
+
+  describe command("echo | openssl s_client -servername mywordpresssite3.com -connect mywordpresssite3.com:443 2>/dev/null | openssl x509 -noout -text -certopt no_subject,no_header,no_version,no_serial,no_signame,no_validity,no_issuer,no_pubkey,no_sigdump,no_aux") do
+    its('stdout') { should match(/DNS:mywordpresssite3.com/) }
+    its('stdout') { should match(/DNS:www.mywordpresssite3.com/) }
+    its('exit_status') { should eq 0 }
+  end
+
 end

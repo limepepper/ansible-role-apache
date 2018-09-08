@@ -10,7 +10,7 @@
     - name: install httpd.conf file for {{ vhost.ServerName }}
       template:
         src: conf/httpd-conf.j2
-        dest: "{{ apache_site_conf_path }}/{{ vhost.ServerName }}.conf"
+        dest: "{{ apache_sites_available }}/{{ vhost.ServerName }}.conf"
         owner: root
         group: root
         mode: 0644
@@ -20,7 +20,7 @@
 
     - name: link the en2ensite type scripts in
       file:
-        src: "{{ apache_site_conf_path }}/{{ vhost.ServerName }}.conf"
+        src: "{{ apache_sites_available }}/{{ vhost.ServerName }}.conf"
         dest: "{{ apache_sites_enabled }}/{{ vhost.ServerName }}.conf"
         state: link
 

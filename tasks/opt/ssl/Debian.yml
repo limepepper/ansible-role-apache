@@ -7,22 +7,22 @@
         msg: |
           In the Debian ssl boot strapper
 
-    - apache2_module:
-        state: present
-        name: ssl
-        ignore_configcheck: yes
+    # - apache2_module:
+    #     state: present
+    #     name: ssl
+    #     ignore_configcheck: yes
+    #     force: yes
 
-        # src: /file/to/link/to
-        # dest: /path/to/symlink
-        # - file:
-        #     src: '../mods-available/{{ item }}'
-        #     dest: '{{ apache_mods_enabled }}/{{ item.dest }}'
-        #     state: link
-        #   with_items:
-        #     - setenvif.conf
-        #     - setenvif.load
-        #     - socache_shmcb.load
-        #     - mime.load
-        #     - mime.conf
-        #     - ssl.load
-        #     - ssl.conf
+    - file:
+        # src: '{{ apache_mods_available }}/{{ item }}'
+        src: '../mods-available/{{ item }}'
+        dest: '{{ apache_mods_enabled }}/{{ item }}'
+        state: link
+      with_items:
+        - setenvif.conf
+        - setenvif.load
+        - socache_shmcb.load
+        - mime.load
+        - mime.conf
+        - ssl.load
+        - ssl.conf

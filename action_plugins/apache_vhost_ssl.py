@@ -31,12 +31,15 @@ class ActionModule(_ActionModule):
         pp = pprint.PrettyPrinter(indent=4)
         results = []
 
-        changed = True
+        changed = False
 
         if task_vars is None:
             task_vars = dict()
 
-        result = super(ActionModule, self).run(tmp, task_vars)
+        # result = super(ActionModule, self).run(tmp, task_vars)
+        result = {}
+
+        result['results'] = []
 
         server_name = self._task.args.get('ServerName', None)
         server_aliases = self._task.args.get('ServerAliases', None)
@@ -61,15 +64,39 @@ class ActionModule(_ActionModule):
 
         dest_path = task_vars['apache_sites_available']
 
-        #
+        path_stack = self._task.get_search_path()
+
+        path_stack = path_stack + \
+            [os.path.join(x, 'limepepper.apache')
+             for x in getattr(C, 'DEFAULT_ROLES_PATH')]
+
+        # if the task is in a role, add that to the search path
+        if self._task._role:
+            path_stack = path_stack + self._task._role._role_path
+
+        task_dir_parent = os.path.join(
+            os.path.dirname(self._task.get_path()), os.pardir)
+
+        if os.path.exists(
+                os.path.join(
+                    task_dir_parent, 'tasks')) and task_dir_parent not in path_stack:
+            path_stack.append(task_dir_parent)
+
+        src = self._loader.path_dwim_relative_stack(
+            path_stack,
+            'templates/conf',
+            'httpd-ssl-conf.j2')
+
         tmpl_args = dict(
-            src='/home/tomhodder/Dropbox/bin/ansible/roles/limepepper.apache/templates/conf/httpd-ssl-conf.j2',
+            src=src,
             dest="{0}/{1}-ssl.conf".format(dest_path, server_name)
         )
-        # self._task.args.copy()
 
-        # call the template action on our params
-        results.append(WrapTemplate(self, tmpl_args).run(task_vars=task_vars))
+        ret1 = WrapTemplate(self, tmpl_args).run(task_vars=task_vars)
+
+        changed = changed or ret1['changed']
+
+        results.append(ret1)
 
         # dest = self._remote_expand_user(dest)
 
@@ -94,5 +121,6 @@ class ActionModule(_ActionModule):
         changed = changed or module_return.get('changed', False)
 
         results.append(module_return)
+        result['changed'] = changed
 
-        return dict(results=results, changed=True)
+        return result

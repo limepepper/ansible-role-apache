@@ -99,5 +99,5 @@
       rescue:
 
         - name: include the debugger script
-          include_tasks: ../bootstrap/distro-debug-packages.yml
+          include_tasks: ../tasks/bootstrap/distro-debug-packages.yml
           tags: always

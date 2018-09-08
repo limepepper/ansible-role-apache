@@ -16,6 +16,7 @@ transport:
 provisioner:
   name: ansible_push
   playbook: tests/test.yml
+  idempotency_test: true
   chef_bootstrap_url: nil
   #ansible_config      : "/path/to/ansible/ansible.cfg"
   verbose: "<%= ENV.key?('ANSIBLE_Vs') ? ENV['ANSIBLE_Vs'] : 'vv' %>"

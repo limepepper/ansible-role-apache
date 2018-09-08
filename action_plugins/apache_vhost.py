@@ -89,24 +89,17 @@ class ActionModule(ActionBase):
             'templates/conf',
             'httpd-conf.j2')
 
-        #
         tmpl_args = dict(
             src=src,
             dest="{0}/{1}.conf".format(dest_path, server_name)
         )
-        # self._task.args.copy()
 
-        # call the template action on our params
         ret1 = WrapTemplate(
             self, tmpl_args).run(task_vars=task_vars)
 
         changed=changed or ret1['changed']
 
         result['results'].append(ret1)
-
-        print("result")
-        print(result)
-        print("")
 
         src_path = task_vars['apache_sites_available']
         dest_path = task_vars['apache_sites_enabled']
@@ -129,15 +122,7 @@ class ActionModule(ActionBase):
 
         changed = changed or module_return.get('changed', False)
 
-        # changed = changed or module_return['changed']
-
         result['results'].append(module_return)
-        print("module_return changed")
-        print(module_return['changed'])
-
-        print("result")
-        print(result)
-
         result['changed'] = changed
 
         return result
@@ -190,7 +175,7 @@ class WrapSymlink(BaseWrap):
         # Use file module to create these
         # print(self.args)
         new_module_args = _create_remote_file_args(self.args)
-        print(new_module_args)
+        # print(new_module_args)
         # new_module_args['path'] = os.path.join(dest, dest_path)
         # new_module_args['src'] = '/etc/apache2/sites-available/mywordpresssite2.com-ssl.conf'
         # new_module_args['state'] = 'link'

@@ -29,10 +29,7 @@
               - ssl/mod_ssl
               # - rewrite
 
-        - name: pip pyOpenSSL package
-          pip:
-            name: pyOpenSSL
-            version: 18.0.0
+        - include_tasks: ../tasks/bootstrap/pyOpenSSL/main.yml
 
         - name: create the var cache directory
           file:
@@ -44,79 +41,14 @@
             - /etc/ssl/csr
           tags: always
 
-        - set_fact:
-            csr: /etc/ssl/csr/ansible.com.csr
-            key: /etc/ssl/private/ansible.com.pem
-            cert: /etc/ssl/crt/ansible.com.crt
+        - include_tasks: dummy-vhost.yml
+          vars:
+            test_domain: mywordpresssite2.com
 
-        - name: Generate an OpenSSL private key.
-          openssl_privatekey:
-            path: /etc/ssl/private/ansible.com.pem
+        - include_tasks: dummy-vhost.yml
+          vars:
+            test_domain: mywordpresssite3.com
 
-        - openssl_csr:
-            path: /etc/ssl/csr/ansible.com.csr
-            privatekey_path: /etc/ssl/private/ansible.com.pem
-            country_name: GB
-            organization_name: "MOnkeyBadger LTd"
-            email_address: certs@limepepper.co.uk
-            common_name: zoneminder
-            subject_alt_name: 'DNS:zoneminder,DNS:zoneminder.limepepper.co.uk'
-
-        - name: Generate a Self Signed OpenSSL certificate
-          openssl_certificate:
-            path: /etc/ssl/crt/ansible.com.crt
-            privatekey_path: /etc/ssl/private/ansible.com.pem
-            csr_path: /etc/ssl/csr/ansible.com.csr
-            provider: selfsigned
-
-        - name: create the test http home dir directory
-          file:
-            name: /var/www/mywordpresssite2.com
-            state: directory
-          notify:
-            - reload apache
-
-        - copy:
-            content: |
-              <html><body><h2>This is a test page YYY</h2></body></html>
-            dest: /var/www/mywordpresssite2.com/index.html
-          notify:
-            - reload apache
-
-        - name: add a https vhost for testing
-          apache_vhost_ssl:
-            ServerName: mywordpresssite2.com
-            ServerAliases:
-              - www.mywordpresssite2.com
-            DocumentRoot: /var/www/mywordpresssite2.com
-            SSLCertificateKeyFile: /etc/ssl/private/ansible.com.pem
-            SSLCertificateFile: /etc/ssl/crt/ansible.com.crt
-            # SSLCertificateChainFile:
-          notify:
-            - reload apache
-          tags: ssl
-
-        #
-        #   register: mywordpresssite2_com_vhost
-        #   tags: dovhost
-        #
-        - name: Ensure that the existing certificate belongs to the specified private key
-          openssl_certificate:
-            path: "{{ cert }}"
-            privatekey_path: "{{ key }}"
-            provider: assertonly
-
-            # - name: Verify that an existing certificate was issued by the
-            # Let's Encrypt CA and is currently still valid
-            #   openssl_certificate:
-            #     path: /etc/ssl/crt/example.com.crt
-            #     provider: assertonly
-            #     issuer:
-            #       O: Let's Encrypt
-            #     has_expired: False
-
-      # /etc/pki/tls/certs/localhost.crt
-      # /etc/pki/tls/private/localhost.key
 
       # for the purposes of testing and debugging, write out the hostvars json
       always:
@@ -134,13 +66,8 @@
           tags: always
 
       rescue:
-        - debug:
-            msg: "As the run has failed, I am going to install debugging utils"
 
-        - include_role:
-            name: '{{playbook_dir}}/..'
-            tasks_from: bootstrap/distro-debug-packages.yml
+        - name: include the debugger script
+          include_tasks: ../tasks/bootstrap/distro-debug-packages.yml
           tags: always
 
-        - fail:
-            msg: "force a failure due to previous errors"
