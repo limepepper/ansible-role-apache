@@ -22,6 +22,11 @@
         - name: import the role under test
           import_role:
             name: '{{playbook_dir}}/..'
+          # vars:
+          #   apache_opts:
+          #     # - php/mod_php
+          #     - ssl/mod_ssl
+          #     # - rewrite
 
         - name: create the test http home dir directory
           file:
@@ -47,6 +52,34 @@
           tags: dovhost
           notify:
             - reload apache
+
+        - set_fact:
+            apache_test_ssl_vhost_domain: mywordpresssite99.com
+
+        # - name: generate a cert for this ssl vhost
+        #   shell:
+        #     cmd: |
+        #       if [ ! -f /etc/pki/tls/certs/{{ apache_test_ssl_vhost_domain }}.crt ]; then
+        #           openssl req -batch -new -days 365  \
+        #             -x509 -nodes \
+        #             -out /etc/pki/tls/certs/{{ apache_test_ssl_vhost_domain }}.crt \
+        #             -keyout /etc/pki/tls/private/{{ apache_test_ssl_vhost_domain }}.key
+        #       fi
+        #   register: gen_self_signed
+        #   changed_when: "'Generating a 2048 bit RSA private key' in gen_self_signed.stdout"
+        #
+        # - name: the http vhost to stage the http challenge response
+        #   apache_vhost_ssl:
+        #     ServerName: "{{ apache_test_ssl_vhost_domain }}"
+        #     ServerAliases:
+        #       - "www.{{ apache_test_ssl_vhost_domain }}"
+        #     DocumentRoot: "/var/www/{{ apache_test_ssl_vhost_domain }}"
+        #     SSLCertificateKeyFile: "/etc/pki/tls/private/{{ apache_test_ssl_vhost_domain }}.key"
+        #     SSLCertificateFile: "/etc/pki/tls/certs/{{ apache_test_ssl_vhost_domain }}.crt"
+        #   register: mywordpresssite99_com_vhost
+        #   tags: dovhost
+        #   notify:
+        #     - reload apache
 
       # for the purposes of testing and debugging, write out the hostvars json
       always:

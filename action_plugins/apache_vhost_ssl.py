@@ -17,9 +17,15 @@ import os
 import os.path
 import tempfile
 import shutil
+import sys
+
+#from action_plugins.common import ensure_dcos, run_command, _dcos_path
+sys.path.append(os.getcwd())
+from action_plugins.apache_vhost import ActionModule as _ActionModule
+from action_plugins.apache_vhost import BaseWrap, WrapCopy, WrapTemplate, WrapSymlink
 
 
-class ActionModule(ActionBase):
+class ActionModule(_ActionModule):
     def run(self, tmp=None, task_vars=None):
 
         pp = pprint.PrettyPrinter(indent=4)
@@ -90,116 +96,3 @@ class ActionModule(ActionBase):
         results.append(module_return)
 
         return dict(results=results, changed=True)
-
-#
-# BOILERPLATE STUFF THAT WOULD NORMALLY BE IN A module
-#
-
-
-class BaseWrap:
-    def __init__(self, action):
-
-        self.action = action
-
-    def get_template_path(self):
-
-        mypath = os.path.abspath(
-            os.path.join(
-                os.path.join(self.action._original_path, os.pardir),
-                os.pardir)
-        )
-
-        source = os.path.join(
-            mypath,
-            'templates'
-        )
-
-        return source
-
-
-class WrapSymlink(BaseWrap):
-
-    def __init__(self, action, args):
-
-        BaseWrap.__init__(self, action)
-
-        self.task = action._task
-        self.args = args
-
-        print(self.args)
-
-    def run(self, task_vars):
-
-        new_task = self.task.copy()
-        new_task.args = self.args
-
-        # Use file module to create these
-        print(self.args)
-        new_module_args = _create_remote_file_args(self.args)
-        print(new_module_args)
-        # new_module_args['path'] = os.path.join(dest, dest_path)
-        # new_module_args['src'] = '/etc/apache2/sites-available/mywordpresssite2.com-ssl.conf'
-        # new_module_args['state'] = 'link'
-        new_module_args['force'] = True
-
-        module_return = self.action._execute_module(
-            module_name='file', module_args=new_module_args, task_vars=task_vars)
-
-        return module_return
-
-
-class WrapTemplate(BaseWrap):
-
-    ARGS = ['src',
-            'dest',
-            'state',
-            'newline_sequence',
-            'variable_start_string',
-            'variable_end_string',
-            'block_start_string',
-            'block_end_string']
-
-    def __init__(self, action, args):
-
-        BaseWrap.__init__(self, action)
-
-        self.task = action._task
-        self.args = args
-
-    def run(self, task_vars):
-        new_task = self.task.copy()
-
-        new_task.args = self.args
-
-        print(self.action._templar.environment.loader.searchpath)
-
-        new_basedir = self.get_template_path()
-
-        self.action._templar.environment.loader.searchpath = [new_basedir]
-
-        print(self.action._templar.environment.loader.searchpath)
-
-        loader = self.action._shared_loader_obj.action_loader
-        action = loader.get('template',
-                            task=new_task,
-                            connection=self.action._connection,
-                            play_context=self.action._play_context,
-                            loader=self.action._loader,
-                            templar=self.action._templar,
-                            shared_loader_obj=self.action._shared_loader_obj)
-
-        action._loader._basedir = new_basedir
-
-        print(task_vars.get('vhost', []))
-
-        return action.run(task_vars=task_vars)
-
-
-class WrapCopy():
-
-    def __init__(self, module):
-
-        self.module = module
-        self._p = self.module.params
-
-        return result

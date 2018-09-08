@@ -10,6 +10,7 @@
     - apache2_module:
         state: present
         name: ssl
+        ignore_configcheck: yes
 
         # src: /file/to/link/to
         # dest: /path/to/symlink

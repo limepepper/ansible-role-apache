@@ -24,8 +24,8 @@ control 'check-vhost-ssl' do
     it { should be_running }
   end
 
-  url = 'https://localhost:443/index.htm'
-
+  url = 'https://localhost:443'
+  
   describe http(url, ssl_verify: false) do
     its('status') { should eq 200 }
     its('body') { should match(/This is a test page YYY/) }
