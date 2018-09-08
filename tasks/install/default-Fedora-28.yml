@@ -1,0 +1,19 @@
+---
+
+- tags: [ apache, suite ]
+  become: true
+  block:
+
+    - include_tasks: default-RedHat.yml
+
+    - name: if fedora didn't generate a self signed cert, add it now
+      shell:
+        cmd: |
+          if [ ! -f /etc/pki/tls/certs/localhost.crt ]; then
+              openssl req -batch -new -days 365  \
+                -x509 -nodes \
+                -out /etc/pki/tls/certs/localhost.crt \
+                -keyout /etc/pki/tls/private/localhost.key
+          fi
+      register: gen_self_signed
+      changed_when: "'Generating a 2048 bit RSA private key' in gen_self_signed.stdout"
