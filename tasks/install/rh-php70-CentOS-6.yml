@@ -61,6 +61,8 @@
       state: link
     with_items:
       - { src: '/etc/rc.d/init.d/httpd24-httpd', dest: '/etc/init.d/httpd' }
+      - { src: '/opt/rh/httpd24/root/etc/httpd', dest: '/etc/httpd' }
+      # - { src: '/opt/rh/httpd24/root/usr/sbin/httpd', dest: '/usr/sbin/httpd' }
       # - { src: '/opt/rh/httpd24/root/usr/sbin/httpd', dest: '/usr/sbin/httpd' }
 
   - name: "fixup scl binaries for {{ item.pkg }}"
