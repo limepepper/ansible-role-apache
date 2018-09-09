@@ -1,58 +1,59 @@
 ---
 
+  # boilerplate
+- name: bootstrap enough that ansible can run most modules
+  include_tasks: "bootstrap/main.yml"
+  tags: [ bootstrap ]
+
 - tags: [ apache ]
   become: yes
   block:
 
-    # boilerplate
-  - name: bootstrap enough that ansible can run most modules
-    include_tasks: "bootstrap/main.yml"
-    tags: [ bootstrap ]
+      # boilerplate
+      # using a custom var and task loader in the main script..
+    # - include_tasks: bootstrap/distro-vars-import.yml
+    #   tags: always
 
-    # boilerplate
-    # using a custom var and task loader in the main script..
-  # - include_tasks: bootstrap/distro-vars-import.yml
-  #   tags: always
+      ## START OF MAIN TASKS SECTION ##
 
-    ## START OF MAIN TASKS SECTION ##
+      # this install the apache package
+    - name: include the main apache installer tasks
+      include_tasks: install/main.yml
+      tags: always
 
-    # this install the apache package
-  - include_tasks: install/main.yml
-    tags: always
+    - debug:
+        var: apache_opts
 
-  - debug:
-      var: apache_opts
+    #{{ role_path }}/vars
+    - name: install configurables
+      include_tasks: "opt/{{ configurable_item }}.yml"
+      with_items: "{{ apache_opts }}"
+      loop_control:
+        loop_var: configurable_item
+      # tags: always
 
-  #{{ role_path }}/vars
-  - name: install configurables
-    include_tasks: "opt/{{ configurable_item }}.yml"
-    with_items: "{{ apache_opts }}"
-    loop_control:
-      loop_var: configurable_item
-    # tags: always
+    - name: guard against trying to restart with broken config
+      shell: "{{ apache_conftest }} || true"
+      register: conftest_check
+      changed_when: "'failed' in conftest_check.stdout"
 
-  - name: guard against trying to restart with broken config
-    shell: "{{ apache_conftest }} || true"
-    register: conftest_check
-    changed_when: "'failed' in conftest_check.stdout"
+    - name: start {{ apache_service }} service after installing and loading mods
+      service:
+        name: "{{ apache_service }}"
+        state: started
+        enabled: yes
+      when: "'failed' not in conftest_check.stdout"
 
-  - name: start {{ apache_service }} service after installing and loading mods
-    service:
-      name: "{{ apache_service }}"
-      state: started
-      enabled: yes
-    when: "'failed' not in conftest_check.stdout"
+    - include_tasks: opt/vhost-ssl.yml
+      loop_control:
+        loop_var: vhost_loop
+      with_items: "{{ apache_vhosts_ssl }}"
+      # tags: always
 
-  - include_tasks: opt/vhost-ssl.yml
-    loop_control:
-      loop_var: vhost_loop
-    with_items: "{{ apache_vhosts_ssl }}"
-    # tags: always
+    - include_tasks: opt/vhost.yml
+      loop_control:
+        loop_var: vhost_loop
+      with_items: "{{ apache_vhosts }}"
+      # tags: always
 
-  - include_tasks: opt/vhost.yml
-    loop_control:
-      loop_var: vhost_loop
-    with_items: "{{ apache_vhosts }}"
-    # tags: always
-
-    ## END OF MAIN TASKS SECTION ##
+      ## END OF MAIN TASKS SECTION ##
